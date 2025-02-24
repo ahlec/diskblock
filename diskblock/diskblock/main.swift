@@ -10,57 +10,73 @@ import CoreFoundation
 import DiskArbitration
 import Foundation
 
-func create_uuid(_ str: String) -> CFUUIDBytes {
-    let uuid = CFUUIDCreateFromString(kCFAllocatorDefault, str as CFString)
-    return CFUUIDGetUUIDBytes(uuid)
+func make_cfuuid(_ str: String) -> CFUUID {
+    return CFUUIDCreateFromString(kCFAllocatorDefault, str as CFString)
 }
 
-func are_uuid_equal(_ a: CFUUIDBytes, _ b: CFUUIDBytes) -> Bool {
-    // TODO
-    return a.byte0 == b.byte0
-}
+let MSI_MONITOR_UUID = make_cfuuid("49D00007-FF63-36B9-9D69-6B3BE16866BB")
 
-let MSI_MONITOR_UUID = create_uuid("49D00007-FF63-36B9-9D69-6B3BE16866BB")
-
-func allow_mount(disk: DADisk, context: UnsafeMutableRawPointer?) -> Unmanaged<
-    DADissenter
->? {
+func get_uuid_of_disk(_ disk: DADisk) -> CFUUID? {
     guard let description = DADiskCopyDescription(disk) as? [CFString: Any]
     else {
-        print("could not get description from disk")
+        print("could not get description from disk \(disk)")
         return nil
     }
 
-    guard let uuid = description[kDADiskDescriptionVolumeUUIDKey] as! CFUUID?
+    return description[kDADiskDescriptionVolumeUUIDKey] as! CFUUID?
+}
+
+func is_disk_blocked(_ uuid: CFUUID) -> Bool {
+    return uuid == MSI_MONITOR_UUID
+}
+
+func unmount_if_mounted(_ session: DASession) {
+    print("sweeping already mounted disks")
+    guard
+        let mountedVolumeURLs = FileManager.default.mountedVolumeURLs(
+            includingResourceValuesForKeys: nil)
     else {
-        print("could not get UUID from description")
+        print("unable to get mounted volumes")
+        return
+    }
+
+    for volumeURL in mountedVolumeURLs {
+        if let disk = DADiskCreateFromVolumePath(
+            kCFAllocatorDefault, session, volumeURL as CFURL)
+        {
+            if let uuid = get_uuid_of_disk(disk) {
+                if is_disk_blocked(uuid) {
+                    print("FOUND \(uuid) as disk \(disk)")
+                    DADiskUnmount(
+                        disk, UInt32(kDADiskUnmountOptionDefault), nil, nil)
+                }
+            }
+        }
+    }
+
+    print("finished sweeping mounted disks")
+}
+
+func mount_approval_callback(disk: DADisk, context: UnsafeMutableRawPointer?)
+    -> Unmanaged<
+        DADissenter
+    >?
+{
+    guard let uuid = get_uuid_of_disk(disk) else {
+        print("could not get UUID of mounting disk \(disk)")
         return nil
     }
 
-    let uuidBytes = CFUUIDGetUUIDBytes(uuid)
-    if are_uuid_equal(uuidBytes, MSI_MONITOR_UUID) {
-        print("NO NAME MOUNTED")
-        let dissenter = DADissenterCreate(
-            kCFAllocatorDefault, Int32(kDAReturnExclusiveAccess),
-            "It's mine!" as CFString)
-        return Unmanaged.passRetained(dissenter)
+    if !is_disk_blocked(uuid) {
+        print("mounting disk \(uuid) is not blocked: \(disk)")
+        return nil
     }
 
-    print("something else mounted: \(uuid)")
-    //        int allow = 0;
-    //
-    //        if (allow) {
-    //                /* Return NULL to allow */
-    //                fprintf(stderr, "allow_mount: allowing mount.\n");
-    //                return NULL;
-    //        } else {
-    //                /* Return a dissenter to deny */
-    //                fprintf(stderr, "allow_mount: refusing mount.\n");
-    //                return DADissenterCreate(
-    //                        kCFAllocatorDefault, kDAReturnExclusiveAccess,
-    //                        CFSTR("It's mine!"));
-    //        }
-    return nil
+    print("disk \(uuid) attempting to mount -- blocking")
+    let dissenter = DADissenterCreate(
+        kCFAllocatorDefault, Int32(kDAReturnExclusiveAccess),
+        "blocked by diskblock" as CFString)
+    return Unmanaged.passRetained(dissenter)
 }
 
 func main() {
@@ -69,19 +85,19 @@ func main() {
         return
     }
 
-    print("allocated")
+    unmount_if_mounted(session)
 
+    print("registering callback")
     DARegisterDiskMountApprovalCallback(
         session,
         nil, /* Match all disks */
-        allow_mount,
-        nil) /* No context */
+        mount_approval_callback,
+        nil)
 
     DASessionScheduleWithRunLoop(
         session, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
 
     let app = NSApplication.shared
-    //    app.delegate = FSAppDelegate.init()
     app.activate(ignoringOtherApps: true)
     app.run()
 }
