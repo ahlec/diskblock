@@ -20,6 +20,7 @@
 
 /* Begin PBXFileReference section */
 		70DBCA012D65C21400353632 /* diskblock */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = diskblock; sourceTree = BUILT_PRODUCTS_DIR; };
+		70E04EAD2D6DA2DB00870644 /* daemon.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = daemon.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -46,6 +47,7 @@
 			children = (
 				70DBCA032D65C21400353632 /* diskblock */,
 				70DBCA022D65C21400353632 /* Products */,
+				70E04EAD2D6DA2DB00870644 /* daemon.plist */,
 			);
 			sourceTree = "<group>";
 		};
