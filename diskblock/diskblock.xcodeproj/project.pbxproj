@@ -6,21 +6,25 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		70E04EAE2D6DA35400870644 /* diskblock in CopyFiles */ = {isa = PBXBuildFile; fileRef = 70DBCA012D65C21400353632 /* diskblock */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		70DBC9FF2D65C21400353632 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
+			buildActionMask = 12;
+			dstPath = /Users/alec/code/diskblock/live;
 			dstSubfolderSpec = 0;
 			files = (
+				70E04EAE2D6DA35400870644 /* diskblock in CopyFiles */,
 			);
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		70DBCA012D65C21400353632 /* diskblock */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = diskblock; sourceTree = BUILT_PRODUCTS_DIR; };
-		70E04EAD2D6DA2DB00870644 /* daemon.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = daemon.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -47,7 +51,6 @@
 			children = (
 				70DBCA032D65C21400353632 /* diskblock */,
 				70DBCA022D65C21400353632 /* Products */,
-				70E04EAD2D6DA2DB00870644 /* daemon.plist */,
 			);
 			sourceTree = "<group>";
 		};
