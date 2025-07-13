@@ -1,61 +1,34 @@
-use core_foundation::base::kCFAllocatorDefault;
-use core_foundation::runloop::{CFRunLoopGetCurrent, kCFRunLoopDefaultMode};
+use core_foundation::dictionary::CFDictionaryRef;
+use core_foundation::string::CFStringRef;
 use std::ffi::c_void;
-use std::ptr;
+
+#[allow(non_camel_case_types)]
+pub type DADiskRef = *mut c_void;
+#[allow(non_camel_case_types)]
+pub type DADissenterRef = *mut c_void;
 
 #[link(name = "DiskArbitration", kind = "framework")]
 unsafe extern "C" {
-    fn DASessionCreate(allocator: *const c_void) -> *mut c_void;
+    pub fn DASessionCreate(allocator: *const c_void) -> *mut c_void;
 
-    fn DARegisterDiskMountApprovalCallback(
+    pub fn DARegisterDiskMountApprovalCallback(
         session: *mut c_void,
         match_: *const c_void,
         callback: extern "C" fn(*mut c_void, *mut c_void, *mut c_void) -> *mut c_void,
         context: *mut c_void,
     );
 
-    fn DASessionScheduleWithRunLoop(
+    pub fn DASessionScheduleWithRunLoop(
         session: *mut c_void,
         runloop: *mut c_void,
         mode: *const c_void,
     );
-}
 
-extern "C" fn mount_approval_callback(
-    _disk: *mut c_void,
-    _description: *mut c_void,
-    _context: *mut c_void,
-) -> *mut c_void {
-    println!("Disk mount approval callback triggered");
-    ptr::null_mut()
-}
+    pub fn DADiskCopyDescription(disk: DADiskRef) -> CFDictionaryRef;
 
-fn main() {
-    unsafe {
-        let session = DASessionCreate(kCFAllocatorDefault); //.as_concrete_TypeRef() as *const c_void);
-        if session.is_null() {
-            println!("couldn't allocate session");
-            return;
-        }
-
-        println!("registering callback");
-
-        // Match all disks by passing null
-        DARegisterDiskMountApprovalCallback(
-            session,
-            ptr::null(),
-            mount_approval_callback,
-            ptr::null_mut(),
-        );
-
-        // Schedule with current run loop
-        DASessionScheduleWithRunLoop(
-            session,
-            CFRunLoopGetCurrent() as *mut c_void,
-            kCFRunLoopDefaultMode, //().as_concrete_TypeRef() as *const c_void,
-        );
-
-        // Keep the runloop alive
-        core_foundation::runloop::CFRunLoopRun();
-    }
+    pub fn DADissenterCreate(
+        allocator: *const c_void,
+        status: i32,
+        status_string: CFStringRef,
+    ) -> DADissenterRef;
 }
