@@ -2,10 +2,31 @@ use core_foundation::dictionary::CFDictionaryRef;
 use core_foundation::string::CFStringRef;
 use std::ffi::c_void;
 
+// https://codebrowser.dev/glibc/glibc/mach/mach/error.h.html
+const fn err_system(x: u32) -> u32 {
+    (x & 0x3f) << 26
+}
+
+const fn err_sub(x: u32) -> u32 {
+    (x & 0xfff) << 14
+}
+
+// https://codebrowser.dev/glibc/glibc/mach/mach/error.h.html
+#[allow(non_upper_case_globals)]
+const err_local: u32 = err_system(0x3e); /* user defined errors */
+
+// https://github.com/phracker/MacOSX-SDKs/blob/041600eda65c6a668f66cb7d56b7d1da3e8bcc93/MacOSX10.9.sdk/System/Library/Frameworks/DiskArbitration.framework/Versions/A/Headers/DADissenter.h#L34
+#[allow(non_upper_case_globals)]
+const err_local_diskarbitration: u32 = err_sub(0x368);
+
 #[allow(non_camel_case_types)]
 pub type DADiskRef = *mut c_void;
 #[allow(non_camel_case_types)]
 pub type DADissenterRef = *mut c_void;
+
+// https://github.com/phracker/MacOSX-SDKs/blob/041600eda65c6a668f66cb7d56b7d1da3e8bcc93/MacOSX10.9.sdk/System/Library/Frameworks/DiskArbitration.framework/Versions/A/Headers/DADissenter.h#L47C5-L47C29
+#[allow(non_upper_case_globals)]
+pub const kDAReturnExclusiveAccess: u32 = err_local | err_local_diskarbitration | 0x04;
 
 #[link(name = "DiskArbitration", kind = "framework")]
 unsafe extern "C" {
