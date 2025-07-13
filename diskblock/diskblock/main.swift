@@ -80,16 +80,20 @@ func mount_approval_callback(disk: DADisk, context: UnsafeMutableRawPointer?)
 }
 
 func logMemoryUsage() -> Void {
-    Logger.log("memory: \(MemoryManager.getCurrentMemoryUsage())")
+    autoreleasepool {
+        Logger.log("memory: \(MemoryManager.getCurrentMemoryUsage())")
+    }
 }
 
 func main() {
     Logger.log("pid: \(getpid())")
 
-    logMemoryUsage()
-    Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
+    let timer = DispatchSource.makeTimerSource()
+    timer.schedule(deadline: .now(), repeating: 60.0)
+    timer.setEventHandler {
         logMemoryUsage()
     }
+    timer.resume()
     
     guard let session = DASessionCreate(kCFAllocatorDefault) else {
         Logger.log("couldn't allocate session")
@@ -108,9 +112,7 @@ func main() {
     DASessionScheduleWithRunLoop(
         session, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
 
-    let app = NSApplication.shared
-    app.activate(ignoringOtherApps: true)
-    app.run()
+    dispatchMain()
 }
 
 main()
