@@ -19,7 +19,7 @@ let MSI_MONITOR_UUID = make_cfuuid("49D00007-FF63-36B9-9D69-6B3BE16866BB")
 func get_uuid_of_disk(_ disk: DADisk) -> CFUUID? {
     guard let description = DADiskCopyDescription(disk) as? [CFString: Any]
     else {
-        print("could not get description from disk \(disk)")
+        Logger.log("could not get description from disk \(disk)")
         return nil
     }
 
@@ -31,12 +31,12 @@ func is_disk_blocked(_ uuid: CFUUID) -> Bool {
 }
 
 func unmount_if_mounted(_ session: DASession) {
-    print("sweeping already mounted disks")
+    Logger.log("sweeping already mounted disks")
     guard
         let mountedVolumeURLs = FileManager.default.mountedVolumeURLs(
             includingResourceValuesForKeys: nil)
     else {
-        print("unable to get mounted volumes")
+        Logger.log("unable to get mounted volumes")
         return
     }
 
@@ -46,7 +46,7 @@ func unmount_if_mounted(_ session: DASession) {
         {
             if let uuid = get_uuid_of_disk(disk) {
                 if is_disk_blocked(uuid) {
-                    print("FOUND \(uuid) as disk \(disk)")
+                    Logger.log("FOUND \(uuid) as disk \(disk)")
                     DADiskUnmount(
                         disk, UInt32(kDADiskUnmountOptionDefault), nil, nil)
                 }
@@ -54,7 +54,7 @@ func unmount_if_mounted(_ session: DASession) {
         }
     }
 
-    print("finished sweeping mounted disks")
+    Logger.log("finished sweeping mounted disks")
 }
 
 func mount_approval_callback(disk: DADisk, context: UnsafeMutableRawPointer?)
@@ -63,31 +63,42 @@ func mount_approval_callback(disk: DADisk, context: UnsafeMutableRawPointer?)
     >?
 {
     guard let uuid = get_uuid_of_disk(disk) else {
-        print("could not get UUID of mounting disk \(disk)")
+        Logger.log("could not get UUID of mounting disk \(disk)")
         return nil
     }
 
     if !is_disk_blocked(uuid) {
-        print("mounting disk \(uuid) is not blocked: \(disk)")
+        Logger.log("mounting disk \(uuid) is not blocked: \(disk)")
         return nil
     }
 
-    print("disk \(uuid) attempting to mount -- blocking")
+    Logger.log("disk \(uuid) attempting to mount -- blocking")
     let dissenter = DADissenterCreate(
         kCFAllocatorDefault, Int32(kDAReturnExclusiveAccess),
         "blocked by diskblock" as CFString)
     return Unmanaged.passRetained(dissenter)
 }
 
+func logMemoryUsage() -> Void {
+    Logger.log("memory: \(MemoryManager.getCurrentMemoryUsage())")
+}
+
 func main() {
+    Logger.log("pid: \(getpid())")
+
+    logMemoryUsage()
+    Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { _ in
+        logMemoryUsage()
+    }
+    
     guard let session = DASessionCreate(kCFAllocatorDefault) else {
-        print("couldn't allocate session")
+        Logger.log("couldn't allocate session")
         return
     }
 
     unmount_if_mounted(session)
 
-    print("registering callback")
+    Logger.log("registering callback")
     DARegisterDiskMountApprovalCallback(
         session,
         nil, /* Match all disks */
