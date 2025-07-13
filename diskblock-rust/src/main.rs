@@ -2,7 +2,9 @@ use core_foundation::base::{CFGetTypeID, CFType, TCFType, kCFAllocatorDefault};
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::runloop::{CFRunLoopGetCurrent, kCFRunLoopDefaultMode};
 use core_foundation::string::CFString;
+use core_foundation::url::CFURLRef;
 use core_foundation::uuid::{CFUUID, CFUUIDGetUUIDBytes, CFUUIDRef};
+use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
 use std::ffi::c_void;
 use std::ptr;
 use uuid::{Uuid, uuid};
@@ -20,11 +22,9 @@ fn get_uuid_of_disk(disk: DADiskRef) -> Option<Uuid> {
             return None;
         }
 
-        println!("checking dictionary!");
         let description: CFDictionary<CFString, CFType> =
             CFDictionary::wrap_under_create_rule(desc_ref);
-        const K_DADISK_DESCRIPTION_VOLUME_UUID_KEY: &str = "DAVolumeUUID";
-        let uuid_key = CFString::new(K_DADISK_DESCRIPTION_VOLUME_UUID_KEY);
+        let uuid_key = CFString::new(kDADiskDescriptionVolumeUUIDKey);
 
         let value = description.find(&uuid_key)?;
 
@@ -92,6 +92,68 @@ extern "C" fn mount_approval_callback(
     }
 }
 
+fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
+    let raw_ptr = nsurl as *const _ as *const std::ffi::c_void;
+    raw_ptr.cast()
+}
+
+pub fn unmount_if_mounted(session: DASessionRef) -> () {
+    println!("sweeping already mounted disks");
+
+    unsafe {
+        let mounted_volume_urls = NSFileManager::defaultManager()
+            .mountedVolumeURLsIncludingResourceValuesForKeys_options(
+                None,
+                NSVolumeEnumerationOptions::empty(),
+            )
+            .unwrap_or_else(|| {
+                println!("unable to get mounted volumes");
+                return Default::default();
+            });
+
+        mounted_volume_urls.iter().for_each(|volume_url| {
+            println!(
+                "disk: {}",
+                volume_url
+                    .absoluteString()
+                    .map(|x| x.to_string())
+                    .unwrap_or(String::from("UNAVAILABLE"))
+            );
+            let path = nsurl_to_cfurl_ref(&volume_url);
+            let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, path);
+            if disk.is_null() {
+                println!("  - DADisk was null");
+                return;
+            }
+
+            let disk_uuid = match get_uuid_of_disk(disk) {
+                Some(disk_uuid) => {
+                    println!("  - uuid: {disk_uuid}");
+                    disk_uuid
+                }
+                None => {
+                    println!("  - could not get uuid");
+                    return;
+                }
+            };
+
+            if !is_disk_blocked(&disk_uuid) {
+                return;
+            }
+
+            println!("  - FOUND {disk_uuid}");
+            DADiskUnmount(
+                disk,
+                kDADiskUnmountOptionDefault,
+                ptr::null_mut(),
+                ptr::null_mut(),
+            );
+        });
+    }
+
+    println!("finished sweeping mounted disks");
+}
+
 fn main() {
     unsafe {
         let session = DASessionCreate(kCFAllocatorDefault);
@@ -116,6 +178,8 @@ fn main() {
             CFRunLoopGetCurrent() as *mut c_void,
             kCFRunLoopDefaultMode as *const c_void,
         );
+
+        unmount_if_mounted(session);
 
         // Keep the runloop alive
         core_foundation::runloop::CFRunLoopRun();
