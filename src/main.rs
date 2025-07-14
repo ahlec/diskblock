@@ -1,95 +1,39 @@
-use core_foundation::base::{CFGetTypeID, CFType, TCFType, kCFAllocatorDefault};
-use core_foundation::dictionary::CFDictionary;
-use core_foundation::runloop::{CFRunLoopGetCurrent, kCFRunLoopDefaultMode};
-use core_foundation::string::CFString;
 use core_foundation::url::CFURLRef;
-use core_foundation::uuid::{CFUUID, CFUUIDGetUUIDBytes, CFUUIDRef};
 use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
-use std::ffi::c_void;
-use std::ptr;
 use uuid::{Uuid, uuid};
 
 mod disk_arbitration;
-use disk_arbitration::*;
+
+use crate::disk::Disk;
+use crate::dissenter::Dissenter;
+use crate::session::Session;
+
+mod disk;
+mod dissenter;
+mod session;
 
 const MSI_MONITOR_UUID: Uuid = uuid!("49D00007-FF63-36B9-9D69-6B3BE16866BB");
-
-fn get_uuid_of_disk(disk: DADiskRef) -> Option<Uuid> {
-    unsafe {
-        let desc_ref = DADiskCopyDescription(disk);
-        if desc_ref.is_null() {
-            println!("could not get description from disk {:?}", disk);
-            return None;
-        }
-
-        let description: CFDictionary<CFString, CFType> =
-            CFDictionary::wrap_under_create_rule(desc_ref);
-        let uuid_key = CFString::new(kDADiskDescriptionVolumeUUIDKey);
-
-        let value = description.find(&uuid_key)?;
-
-        if CFUUID::type_id() != CFGetTypeID(value.as_concrete_TypeRef()) {
-            println!("UUID not found or not a CFUUID");
-            return None;
-        }
-
-        let cf_uuid_ref = value.as_CFTypeRef() as CFUUIDRef;
-        let bytes = CFUUIDGetUUIDBytes(cf_uuid_ref);
-        Some(Uuid::from_bytes([
-            bytes.byte0,
-            bytes.byte1,
-            bytes.byte2,
-            bytes.byte3,
-            bytes.byte4,
-            bytes.byte5,
-            bytes.byte6,
-            bytes.byte7,
-            bytes.byte8,
-            bytes.byte9,
-            bytes.byte10,
-            bytes.byte11,
-            bytes.byte12,
-            bytes.byte13,
-            bytes.byte14,
-            bytes.byte15,
-        ]))
-    }
-}
 
 fn is_disk_blocked(uuid: &Uuid) -> bool {
     uuid.eq(&MSI_MONITOR_UUID)
 }
 
-extern "C" fn mount_approval_callback(
-    disk: *mut c_void,
-    _description: *mut c_void,
-    _context: *mut c_void,
-) -> *mut c_void {
-    match get_uuid_of_disk(disk) {
-        Some(uuid) => {
-            if !is_disk_blocked(&uuid) {
-                println!("mounting disk {uuid} is not blocked");
-                return ptr::null_mut(); // allow mount
-            }
-
-            println!("disk {uuid} attempting to mount -- blocking");
-
-            let reason = CFString::new("blocked by diskblock");
-            unsafe {
-                let dissenter = DADissenterCreate(
-                    kCFAllocatorDefault,
-                    kDAReturnExclusiveAccess as i32,
-                    reason.as_concrete_TypeRef(),
-                );
-
-                return dissenter;
-            }
-        }
+fn rust_mount_approval_callback(disk: Disk) -> Option<Dissenter> {
+    let uuid = match disk.get_uuid() {
+        Some(uuid) => uuid,
         None => {
-            println!("could not get UUID of mounting disk {:?}", disk);
-            return ptr::null_mut(); // allow mount
+            println!("Could not get UUID of mounting disk {disk}");
+            return None;
         }
+    };
+
+    if !is_disk_blocked(&uuid) {
+        println!("mounting disk {uuid} is not blocked");
+        return None;
     }
+
+    println!("disk {uuid} attempting to mount -- blocking");
+    Some(Dissenter::new("blocked by diskblock"))
 }
 
 fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
@@ -97,7 +41,7 @@ fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
     raw_ptr.cast()
 }
 
-pub fn unmount_if_mounted(session: DASessionRef) -> () {
+pub fn unmount_if_mounted(session: &Session) -> () {
     println!("sweeping already mounted disks");
 
     unsafe {
@@ -120,13 +64,15 @@ pub fn unmount_if_mounted(session: DASessionRef) -> () {
                     .unwrap_or(String::from("UNAVAILABLE"))
             );
             let path = nsurl_to_cfurl_ref(&volume_url);
-            let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, path);
-            if disk.is_null() {
-                println!("  - DADisk was null");
-                return;
-            }
+            let disk = match session.get_disk_from_volume_path(path) {
+                Some(disk) => disk,
+                None => {
+                    println!("  - DADisk was null");
+                    return;
+                }
+            };
 
-            let disk_uuid = match get_uuid_of_disk(disk) {
+            let disk_uuid = match disk.get_uuid() {
                 Some(disk_uuid) => {
                     println!("  - uuid: {disk_uuid}");
                     disk_uuid
@@ -142,46 +88,33 @@ pub fn unmount_if_mounted(session: DASessionRef) -> () {
             }
 
             println!("  - FOUND {disk_uuid}");
-            DADiskUnmount(
-                disk,
-                kDADiskUnmountOptionDefault,
-                ptr::null_mut(),
-                ptr::null_mut(),
-            );
+            disk.unmount();
         });
     }
 
     println!("finished sweeping mounted disks");
 }
 
-fn main() {
-    unsafe {
-        let session = DASessionCreate(kCFAllocatorDefault);
-        if session.is_null() {
+fn main() -> Result<(), ()> {
+    let session = match Session::new() {
+        Some(session) => session,
+        None => {
             println!("couldn't allocate session");
-            return;
+            return Err(());
         }
+    };
 
-        println!("registering callback");
+    session.register_approval_callback(rust_mount_approval_callback);
+    println!("Callback registered");
 
-        // Match all disks by passing null
-        DARegisterDiskMountApprovalCallback(
-            session,
-            ptr::null(),
-            mount_approval_callback,
-            ptr::null_mut(),
-        );
+    session.schedule();
+    println!("Session scheduled");
 
-        // Schedule with current run loop
-        DASessionScheduleWithRunLoop(
-            session,
-            CFRunLoopGetCurrent() as *mut c_void,
-            kCFRunLoopDefaultMode as *const c_void,
-        );
+    unmount_if_mounted(&session);
 
-        unmount_if_mounted(session);
-
-        // Keep the runloop alive
+    unsafe {
         core_foundation::runloop::CFRunLoopRun();
     }
+
+    Ok(())
 }
