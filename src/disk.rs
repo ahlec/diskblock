@@ -37,7 +37,7 @@ impl Disk {
         let value = description.find(&uuid_key)?;
 
         if CFUUID::type_id() != unsafe { CFGetTypeID(value.as_concrete_TypeRef()) } {
-            println!("UUID not found or not a CFUUID");
+            log::info!("UUID not found or not a CFUUID");
             return None;
         }
 

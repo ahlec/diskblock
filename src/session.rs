@@ -22,7 +22,7 @@ extern "C" fn trampoline_approval_callback<T: Fn(Disk) -> Option<Dissenter>>(
     let disk = match Disk::from_ref(disk) {
         Some(disk) => disk,
         None => {
-            println!("DADiskRef was invalid");
+            log::error!("DADiskRef was invalid");
             return ptr::null_mut();
         }
     };

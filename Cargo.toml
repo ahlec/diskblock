@@ -5,5 +5,8 @@ edition = "2024"
 
 [dependencies]
 core-foundation = { version = "0.10.1", features = ["with-uuid"] }
+log = "0.4.27"
 objc2-foundation = { version = "0.3.1", features = ["NSFileManager"] }
+simplelog = "0.12.2"
+time = "0.3.41"
 uuid = "1.17.0"

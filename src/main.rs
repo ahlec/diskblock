@@ -1,5 +1,10 @@
 use core_foundation::url::CFURLRef;
 use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
+use simplelog::{
+    ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, TermLogger, TerminalMode, WriteLogger,
+    format_description,
+};
+use std::fs::OpenOptions;
 use uuid::{Uuid, uuid};
 
 mod disk_arbitration;
@@ -22,17 +27,17 @@ fn rust_mount_approval_callback(disk: Disk) -> Option<Dissenter> {
     let uuid = match disk.get_uuid() {
         Some(uuid) => uuid,
         None => {
-            println!("Could not get UUID of mounting disk {disk}");
+            log::error!("Could not get UUID of mounting disk {disk}");
             return None;
         }
     };
 
     if !is_disk_blocked(&uuid) {
-        println!("mounting disk {uuid} is not blocked");
+        log::info!("mounting disk {uuid} is not blocked");
         return None;
     }
 
-    println!("disk {uuid} attempting to mount -- blocking");
+    log::info!("disk {uuid} attempting to mount -- blocking");
     Some(Dissenter::new("blocked by diskblock"))
 }
 
@@ -42,7 +47,7 @@ fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
 }
 
 pub fn unmount_if_mounted(session: &Session) -> () {
-    println!("sweeping already mounted disks");
+    log::info!("sweeping already mounted disks");
 
     unsafe {
         let mounted_volume_urls = NSFileManager::defaultManager()
@@ -51,12 +56,12 @@ pub fn unmount_if_mounted(session: &Session) -> () {
                 NSVolumeEnumerationOptions::empty(),
             )
             .unwrap_or_else(|| {
-                println!("unable to get mounted volumes");
+                log::error!("unable to get mounted volumes");
                 return Default::default();
             });
 
         mounted_volume_urls.iter().for_each(|volume_url| {
-            println!(
+            log::info!(
                 "disk: {}",
                 volume_url
                     .absoluteString()
@@ -67,18 +72,18 @@ pub fn unmount_if_mounted(session: &Session) -> () {
             let disk = match session.get_disk_from_volume_path(path) {
                 Some(disk) => disk,
                 None => {
-                    println!("  - DADisk was null");
+                    log::info!("  - DADisk was null");
                     return;
                 }
             };
 
             let disk_uuid = match disk.get_uuid() {
                 Some(disk_uuid) => {
-                    println!("  - uuid: {disk_uuid}");
+                    log::info!("  - uuid: {disk_uuid}");
                     disk_uuid
                 }
                 None => {
-                    println!("  - could not get uuid");
+                    log::info!("  - could not get uuid");
                     return;
                 }
             };
@@ -87,28 +92,57 @@ pub fn unmount_if_mounted(session: &Session) -> () {
                 return;
             }
 
-            println!("  - FOUND {disk_uuid}");
+            log::info!("  - FOUND {disk_uuid}");
             disk.unmount();
         });
     }
 
-    println!("finished sweeping mounted disks");
+    log::info!("finished sweeping mounted disks");
 }
 
 fn main() -> Result<(), ()> {
+    let log_config = ConfigBuilder::new()
+        .set_time_format_custom(format_description!(
+            "[year]-[month]-[day] [hour]:[minute]:[second]"
+        ))
+        .set_time_offset_to_local()
+        .unwrap()
+        .build();
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            log_config.clone(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(
+            LevelFilter::Info,
+            log_config.clone(),
+            OpenOptions::new()
+                .write(true)
+                .append(true)
+                .create(true)
+                .open("diskblock.log")
+                .unwrap(),
+        ),
+    ])
+    .unwrap();
+
+    log::info!("============================================================");
+
     let session = match Session::new() {
         Some(session) => session,
         None => {
-            println!("couldn't allocate session");
+            log::error!("couldn't allocate session");
             return Err(());
         }
     };
 
     session.register_approval_callback(rust_mount_approval_callback);
-    println!("Callback registered");
+    log::info!("Callback registered");
 
     session.schedule();
-    println!("Session scheduled");
+    log::info!("Session scheduled");
 
     unmount_if_mounted(&session);
 

@@ -1,5 +1,6 @@
 .DS_Store
 live/
+diskblock.log
 
 # Rust
 target/
