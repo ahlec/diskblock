@@ -1,20 +1,17 @@
 use core_foundation::url::CFURLRef;
 use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
-use simplelog::{
-    ColorChoice, CombinedLogger, ConfigBuilder, LevelFilter, TermLogger, TerminalMode, WriteLogger,
-    format_description,
-};
-use std::fs::OpenOptions;
 use uuid::{Uuid, uuid};
 
 mod disk_arbitration;
 
 use crate::disk::Disk;
 use crate::dissenter::Dissenter;
+use crate::logger::init_logger;
 use crate::session::Session;
 
 mod disk;
 mod dissenter;
+mod logger;
 mod session;
 
 const MSI_MONITOR_UUID: Uuid = uuid!("49D00007-FF63-36B9-9D69-6B3BE16866BB");
@@ -101,32 +98,7 @@ pub fn unmount_if_mounted(session: &Session) -> () {
 }
 
 fn main() -> Result<(), ()> {
-    let log_config = ConfigBuilder::new()
-        .set_time_format_custom(format_description!(
-            "[year]-[month]-[day] [hour]:[minute]:[second]"
-        ))
-        .set_time_offset_to_local()
-        .unwrap()
-        .build();
-    CombinedLogger::init(vec![
-        TermLogger::new(
-            LevelFilter::Info,
-            log_config.clone(),
-            TerminalMode::Mixed,
-            ColorChoice::Auto,
-        ),
-        WriteLogger::new(
-            LevelFilter::Info,
-            log_config.clone(),
-            OpenOptions::new()
-                .write(true)
-                .append(true)
-                .create(true)
-                .open("diskblock.log")
-                .unwrap(),
-        ),
-    ])
-    .unwrap();
+    init_logger();
 
     log::info!("============================================================");
 
