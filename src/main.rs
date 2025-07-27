@@ -4,12 +4,14 @@ use crate::disk::Disk;
 use crate::dissenter::Dissenter;
 use crate::logger::init_logger;
 use crate::session::Session;
+use crate::system_events::{PowerEvent, listen_for_power_events};
 
 mod disk;
 mod dissenter;
 mod ffi;
 mod logger;
 mod session;
+mod system_events;
 
 const MSI_MONITOR_UUID: Uuid = uuid!("49D00007-FF63-36B9-9D69-6B3BE16866BB");
 
@@ -64,9 +66,21 @@ fn main() -> Result<(), ()> {
 
     unmount_if_mounted(&session);
 
+    let subscription = listen_for_power_events(|event| {
+        let msg = match event {
+            PowerEvent::CanSleep => "CAN SLEEP",
+            PowerEvent::HasPoweredOn => "HAS POWERED ON",
+            PowerEvent::WillPowerOn => "WILL POWER ON",
+            PowerEvent::WillSleep => "WILL SLEEP",
+        };
+        log::info!("power event: {msg}");
+    });
+
     unsafe {
         core_foundation::runloop::CFRunLoopRun();
     }
+
+    drop(subscription);
 
     Ok(())
 }
