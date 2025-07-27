@@ -30,19 +30,20 @@ fn rust_mount_approval_callback(disk: Disk) -> Option<Dissenter> {
 }
 
 pub fn unmount_if_mounted(session: &Session) -> () {
-    log::info!("sweeping already mounted disks");
-
-    session.get_mounted_disks().for_each(|disk| {
-        log::info!("- {disk}");
+    let mut did_unmount = false;
+    for disk in session.get_mounted_disks() {
         if !is_disk_blocked(&disk.uuid) {
-            return;
+            continue;
         }
 
-        log::info!("  -> UNMOUNTING");
+        log::info!("Unmounting already mounted disk: {disk}");
         disk.unmount();
-    });
+        did_unmount = true;
+    }
 
-    log::info!("finished sweeping mounted disks");
+    if !did_unmount {
+        log::info!("Swept mounted disks, no blocked disks found mounted");
+    }
 }
 
 fn main() -> Result<(), ()> {
@@ -68,13 +69,18 @@ fn main() -> Result<(), ()> {
 
     let subscription = listen_for_power_events(|event| {
         let msg = match event {
-            PowerEvent::CanSleep => "CAN SLEEP",
-            PowerEvent::HasPoweredOn => "HAS POWERED ON",
             PowerEvent::WillPowerOn => "WILL POWER ON",
             PowerEvent::WillSleep => "WILL SLEEP",
+            _ => {
+                // Ignore other events
+                return;
+            }
         };
+
         log::info!("power event: {msg}");
+        unmount_if_mounted(&session);
     });
+    log::info!("Subscribed to power events");
 
     unsafe {
         core_foundation::runloop::CFRunLoopRun();
