@@ -1,7 +1,5 @@
 use uuid::{Uuid, uuid};
 
-mod disk_arbitration;
-
 use crate::disk::Disk;
 use crate::dissenter::Dissenter;
 use crate::logger::init_logger;
@@ -9,6 +7,7 @@ use crate::session::Session;
 
 mod disk;
 mod dissenter;
+mod ffi;
 mod logger;
 mod session;
 

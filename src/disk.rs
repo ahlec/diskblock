@@ -1,4 +1,4 @@
-use crate::disk_arbitration::{
+use crate::ffi::disk_arbitration::{
     DADiskCopyDescription, DADiskRef, DADiskUnmount, kDADiskDescriptionVolumeNameKey,
     kDADiskDescriptionVolumePathKey, kDADiskDescriptionVolumeUUIDKey, kDADiskUnmountOptionDefault,
 };

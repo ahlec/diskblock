@@ -1,10 +1,10 @@
 use crate::{
     disk::Disk,
-    disk_arbitration::{
+    dissenter::Dissenter,
+    ffi::disk_arbitration::{
         DADiskCreateFromVolumePath, DADiskRef, DADissenterRef, DARegisterDiskMountApprovalCallback,
         DASessionCreate, DASessionRef, DASessionScheduleWithRunLoop,
     },
-    dissenter::Dissenter,
 };
 use core_foundation::{
     base::{CFRelease, kCFAllocatorDefault},

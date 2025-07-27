@@ -4,21 +4,12 @@ use core_foundation::url::CFURLRef;
 use std::ffi::c_void;
 
 // https://codebrowser.dev/glibc/glibc/mach/mach/error.h.html
-const fn err_system(x: u32) -> u32 {
-    (x & 0x3f) << 26
-}
-
-const fn err_sub(x: u32) -> u32 {
-    (x & 0xfff) << 14
-}
-
-// https://codebrowser.dev/glibc/glibc/mach/mach/error.h.html
 #[allow(non_upper_case_globals)]
-const err_local: u32 = err_system(0x3e); /* user defined errors */
+const err_local: u32 = crate::ffi::err_system(0x3e); /* user defined errors */
 
 // https://github.com/phracker/MacOSX-SDKs/blob/041600eda65c6a668f66cb7d56b7d1da3e8bcc93/MacOSX10.9.sdk/System/Library/Frameworks/DiskArbitration.framework/Versions/A/Headers/DADissenter.h#L34
 #[allow(non_upper_case_globals)]
-const err_local_diskarbitration: u32 = err_sub(0x368);
+const err_local_diskarbitration: u32 = crate::ffi::err_sub(0x368);
 
 pub type DADiskRef = *mut c_void;
 

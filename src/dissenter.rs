@@ -3,7 +3,7 @@ use core_foundation::{
     string::CFString,
 };
 
-use crate::disk_arbitration::{DADissenterCreate, DADissenterRef, kDAReturnExclusiveAccess};
+use crate::ffi::disk_arbitration::{DADissenterCreate, DADissenterRef, kDAReturnExclusiveAccess};
 
 pub struct Dissenter {
     pub ptr: DADissenterRef,
