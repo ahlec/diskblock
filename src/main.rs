@@ -1,5 +1,3 @@
-use core_foundation::url::CFURLRef;
-use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
 use uuid::{Uuid, uuid};
 
 mod disk_arbitration;
@@ -38,61 +36,28 @@ fn rust_mount_approval_callback(disk: Disk) -> Option<Dissenter> {
     Some(Dissenter::new("blocked by diskblock"))
 }
 
-fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
-    let raw_ptr = nsurl as *const _ as *const std::ffi::c_void;
-    raw_ptr.cast()
-}
-
 pub fn unmount_if_mounted(session: &Session) -> () {
     log::info!("sweeping already mounted disks");
 
-    unsafe {
-        let mounted_volume_urls = NSFileManager::defaultManager()
-            .mountedVolumeURLsIncludingResourceValuesForKeys_options(
-                None,
-                NSVolumeEnumerationOptions::empty(),
-            )
-            .unwrap_or_else(|| {
-                log::error!("unable to get mounted volumes");
-                return Default::default();
-            });
-
-        mounted_volume_urls.iter().for_each(|volume_url| {
-            log::info!(
-                "disk: {}",
-                volume_url
-                    .absoluteString()
-                    .map(|x| x.to_string())
-                    .unwrap_or(String::from("UNAVAILABLE"))
-            );
-            let path = nsurl_to_cfurl_ref(&volume_url);
-            let disk = match session.get_disk_from_volume_path(path) {
-                Some(disk) => disk,
-                None => {
-                    log::info!("  - DADisk was null");
-                    return;
-                }
-            };
-
-            let disk_uuid = match disk.get_uuid() {
-                Some(disk_uuid) => {
-                    log::info!("  - uuid: {disk_uuid}");
-                    disk_uuid
-                }
-                None => {
-                    log::info!("  - could not get uuid");
-                    return;
-                }
-            };
-
-            if !is_disk_blocked(&disk_uuid) {
+    session.get_mounted_disks().for_each(|disk| {
+        let disk_uuid = match disk.get_uuid() {
+            Some(disk_uuid) => {
+                log::info!("  - uuid: {disk_uuid}");
+                disk_uuid
+            }
+            None => {
+                log::info!("  - could not get uuid");
                 return;
             }
+        };
 
-            log::info!("  - FOUND {disk_uuid}");
-            disk.unmount();
-        });
-    }
+        if !is_disk_blocked(&disk_uuid) {
+            return;
+        }
+
+        log::info!("  - FOUND {disk_uuid}");
+        disk.unmount();
+    });
 
     log::info!("finished sweeping mounted disks");
 }

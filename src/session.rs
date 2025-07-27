@@ -11,6 +11,7 @@ use core_foundation::{
     runloop::{CFRunLoopGetCurrent, kCFRunLoopDefaultMode},
     url::CFURLRef,
 };
+use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
 use std::ffi::c_void;
 use std::ptr;
 
@@ -34,6 +35,11 @@ extern "C" fn trampoline_approval_callback<T: Fn(Disk) -> Option<Dissenter>>(
     }
 }
 
+fn nsurl_to_cfurl_ref(nsurl: &NSURL) -> CFURLRef {
+    let raw_ptr = nsurl as *const _ as *const std::ffi::c_void;
+    raw_ptr.cast()
+}
+
 pub struct Session {
     ptr: DASessionRef,
 }
@@ -48,10 +54,25 @@ impl Session {
         }
     }
 
-    pub fn get_disk_from_volume_path(&self, path: CFURLRef) -> Option<Disk> {
-        let ptr: DADiskRef =
-            unsafe { DADiskCreateFromVolumePath(kCFAllocatorDefault, self.ptr, path) };
-        Disk::from_ref(ptr)
+    pub fn get_mounted_disks(&self) -> impl Iterator<Item = Disk> {
+        unsafe {
+            let mounted_volume_urls = NSFileManager::defaultManager()
+                .mountedVolumeURLsIncludingResourceValuesForKeys_options(
+                    None,
+                    NSVolumeEnumerationOptions::empty(),
+                )
+                .unwrap_or_else(|| {
+                    log::error!("unable to get mounted volumes");
+                    return Default::default();
+                });
+
+            mounted_volume_urls.into_iter().filter_map(|volume_url| {
+                let path = nsurl_to_cfurl_ref(&volume_url);
+                let ptr: DADiskRef =
+                    DADiskCreateFromVolumePath(kCFAllocatorDefault, self.ptr, path);
+                Disk::from_ref(ptr)
+            })
+        }
     }
 
     pub fn register_approval_callback<T: Fn(Disk) -> Option<Dissenter> + 'static>(
