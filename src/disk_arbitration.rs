@@ -31,6 +31,12 @@ pub type DASessionRef = *mut c_void;
 pub const kDAReturnExclusiveAccess: u32 = err_local | err_local_diskarbitration | 0x04;
 
 #[allow(non_upper_case_globals)]
+pub const kDADiskDescriptionVolumeNameKey: &str = "DAVolumeName";
+
+#[allow(non_upper_case_globals)]
+pub const kDADiskDescriptionVolumePathKey: &str = "DAVolumePath";
+
+#[allow(non_upper_case_globals)]
 pub const kDADiskDescriptionVolumeUUIDKey: &str = "DAVolumeUUID";
 
 #[allow(non_upper_case_globals)]

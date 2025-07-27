@@ -12,15 +12,15 @@ use core_foundation::{
     url::CFURLRef,
 };
 use objc2_foundation::{NSFileManager, NSURL, NSVolumeEnumerationOptions};
-use std::ffi::c_void;
 use std::ptr;
+use std::{ffi::c_void, path::PathBuf};
 
 extern "C" fn trampoline_approval_callback<T: Fn(Disk) -> Option<Dissenter>>(
     disk: DADiskRef,
     _description: *mut c_void,
     context: *mut c_void,
 ) -> DADissenterRef {
-    let disk = match Disk::from_ref(disk) {
+    let disk = match Disk::from_ref(disk, None) {
         Some(disk) => disk,
         None => {
             log::error!("DADiskRef was invalid");
@@ -70,7 +70,10 @@ impl Session {
                 let path = nsurl_to_cfurl_ref(&volume_url);
                 let ptr: DADiskRef =
                     DADiskCreateFromVolumePath(kCFAllocatorDefault, self.ptr, path);
-                Disk::from_ref(ptr)
+                let path = volume_url
+                    .absoluteString()
+                    .map(|str| PathBuf::from(str.to_string()));
+                Disk::from_ref(ptr, path)
             })
         }
     }

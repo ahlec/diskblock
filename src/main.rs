@@ -19,20 +19,12 @@ fn is_disk_blocked(uuid: &Uuid) -> bool {
 }
 
 fn rust_mount_approval_callback(disk: Disk) -> Option<Dissenter> {
-    let uuid = match disk.get_uuid() {
-        Some(uuid) => uuid,
-        None => {
-            log::error!("Could not get UUID of mounting disk {disk}");
-            return None;
-        }
-    };
-
-    if !is_disk_blocked(&uuid) {
-        log::info!("mounting disk {uuid} is not blocked");
+    if !is_disk_blocked(&disk.uuid) {
+        log::info!("mounting disk {} is not blocked", disk.uuid);
         return None;
     }
 
-    log::info!("disk {uuid} attempting to mount -- blocking");
+    log::info!("disk {} attempting to mount -- blocking", disk.uuid);
     Some(Dissenter::new("blocked by diskblock"))
 }
 
@@ -40,22 +32,12 @@ pub fn unmount_if_mounted(session: &Session) -> () {
     log::info!("sweeping already mounted disks");
 
     session.get_mounted_disks().for_each(|disk| {
-        let disk_uuid = match disk.get_uuid() {
-            Some(disk_uuid) => {
-                log::info!("  - uuid: {disk_uuid}");
-                disk_uuid
-            }
-            None => {
-                log::info!("  - could not get uuid");
-                return;
-            }
-        };
-
-        if !is_disk_blocked(&disk_uuid) {
+        log::info!("- {disk}");
+        if !is_disk_blocked(&disk.uuid) {
             return;
         }
 
-        log::info!("  - FOUND {disk_uuid}");
+        log::info!("  -> UNMOUNTING");
         disk.unmount();
     });
 

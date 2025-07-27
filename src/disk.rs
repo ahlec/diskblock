@@ -1,31 +1,32 @@
 use crate::disk_arbitration::{
-    DADiskCopyDescription, DADiskRef, DADiskUnmount, kDADiskDescriptionVolumeUUIDKey,
-    kDADiskUnmountOptionDefault,
+    DADiskCopyDescription, DADiskRef, DADiskUnmount, kDADiskDescriptionVolumeNameKey,
+    kDADiskDescriptionVolumePathKey, kDADiskDescriptionVolumeUUIDKey, kDADiskUnmountOptionDefault,
 };
-use core_foundation::base::{CFGetTypeID, CFType, TCFType};
+use core_foundation::base::{CFGetTypeID, CFType, FromVoid, TCFType};
 use core_foundation::dictionary::CFDictionary;
 use core_foundation::string::CFString;
+use core_foundation::url::CFURL;
 use core_foundation::uuid::{CFUUID, CFUUIDGetUUIDBytes, CFUUIDRef};
 use std::fmt::{Display, Formatter, Result};
+use std::path::PathBuf;
 use std::ptr;
 use uuid::Uuid;
 
 pub struct Disk {
+    pub name: String,
+    pub path: Option<PathBuf>,
+    pub uuid: Uuid,
     ptr: DADiskRef,
 }
 
 impl Disk {
-    pub fn from_ref(ptr: DADiskRef) -> Option<Self> {
+    pub fn from_ref(ptr: DADiskRef, volume_path: Option<PathBuf>) -> Option<Self> {
         if ptr.is_null() {
-            None
-        } else {
-            Some(Self { ptr })
+            return None;
         }
-    }
 
-    pub fn get_uuid(&self) -> Option<Uuid> {
         let description: CFDictionary<CFString, CFType> = unsafe {
-            let desc_ref = DADiskCopyDescription(self.ptr);
+            let desc_ref = DADiskCopyDescription(ptr);
             if desc_ref.is_null() {
                 return None;
             }
@@ -33,6 +34,44 @@ impl Disk {
             CFDictionary::wrap_under_create_rule(desc_ref)
         };
 
+        Some(Self {
+            name: Disk::get_name_from_description(&description)
+                .unwrap_or(String::from("Unnamed Volume")),
+            path: volume_path.or_else(|| Disk::get_path_from_description(&description)),
+            uuid: Disk::get_uuid_from_description(&description).unwrap_or(Uuid::nil()),
+            ptr,
+        })
+    }
+
+    fn get_name_from_description(description: &CFDictionary<CFString, CFType>) -> Option<String> {
+        let name_key = CFString::new(kDADiskDescriptionVolumeNameKey);
+        let value = description.find(&name_key)?;
+
+        if CFString::type_id() != unsafe { CFGetTypeID(value.as_concrete_TypeRef()) } {
+            log::info!("Name not found or not a CFString");
+            return None;
+        }
+
+        let cf_string_ref = value.as_CFTypeRef();
+        let cf_string = unsafe { CFString::from_void(cf_string_ref) };
+        Some(cf_string.to_string())
+    }
+
+    fn get_path_from_description(description: &CFDictionary<CFString, CFType>) -> Option<PathBuf> {
+        let path_key = CFString::new(kDADiskDescriptionVolumePathKey);
+        let value = description.find(&path_key)?;
+
+        if CFURL::type_id() != unsafe { CFGetTypeID(value.as_concrete_TypeRef()) } {
+            log::info!("Path not found or not a CFURL");
+            return None;
+        }
+
+        let cf_url_ref = value.as_CFTypeRef();
+        let cf_url = unsafe { CFURL::from_void(cf_url_ref) };
+        Some(PathBuf::from(cf_url.absolute().get_string().to_string()))
+    }
+
+    fn get_uuid_from_description(description: &CFDictionary<CFString, CFType>) -> Option<Uuid> {
         let uuid_key = CFString::new(kDADiskDescriptionVolumeUUIDKey);
         let value = description.find(&uuid_key)?;
 
@@ -78,9 +117,12 @@ impl Disk {
 
 impl Display for Disk {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        match self.get_uuid() {
-            Some(uuid) => write!(f, "Disk<{uuid}>"),
-            None => write!(f, "Disk<UNKNOWN>"),
+        if let Some(path) = &self.path
+            && let Some(path_str) = path.to_str()
+        {
+            write!(f, "{} ({}) {path_str}", self.name, self.uuid)
+        } else {
+            write!(f, "{} ({})", self.name, self.uuid)
         }
     }
 }

@@ -25,28 +25,27 @@
     {
       "attr_path": "cargo",
       "broken": false,
-      "derivation": "/nix/store/yz64m4f4dlr3n8mkjlk8la87wh7x962d-cargo-1.87.0.drv",
+      "derivation": "/nix/store/c54ll5irj2l4a1i8c4ksxkafwm3qhx2l-cargo-1.88.0.drv",
       "description": "Downloads your Rust project's dependencies and builds your project",
       "install_id": "cargo",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "cargo-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "cargo-1.88.0",
       "pname": "cargo",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:14:30.263548Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T00:28:20.871601Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/v88yigjzrp2i744pd7pk7cia03vzqzlg-cargo-1.87.0"
+        "out": "/nix/store/xi7h5x85b0jasfjywj033hhrvarqpsm9-cargo-1.88.0"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -55,28 +54,27 @@
     {
       "attr_path": "cargo",
       "broken": false,
-      "derivation": "/nix/store/06h7s3x56jiqmj7mr17rv6pzcx2c1ss5-cargo-1.87.0.drv",
+      "derivation": "/nix/store/vkxs57hs3mkf2wc6fc44bijc5wympx1m-cargo-1.88.0.drv",
       "description": "Downloads your Rust project's dependencies and builds your project",
       "install_id": "cargo",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "cargo-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "cargo-1.88.0",
       "pname": "cargo",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:34:50.263570Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T00:48:10.509969Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/x18skxk3aq3q6cwg5h24cxdykdvwphs3-cargo-1.87.0"
+        "out": "/nix/store/xy5h5sv2fp8mq2vs8cvbx5ajpcmzy8gq-cargo-1.88.0"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -85,28 +83,27 @@
     {
       "attr_path": "cargo",
       "broken": false,
-      "derivation": "/nix/store/17qs0saqry5q7zl8jscz2rj2n4ljv6f8-cargo-1.87.0.drv",
+      "derivation": "/nix/store/v7gcjjrfhmjvp7b5kgi13s4lwmbh0g9z-cargo-1.88.0.drv",
       "description": "Downloads your Rust project's dependencies and builds your project",
       "install_id": "cargo",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "cargo-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "cargo-1.88.0",
       "pname": "cargo",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:53:48.554643Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T01:06:54.184792Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/7nimja53blny1ph2nh8b65ymjcsb1dhg-cargo-1.87.0"
+        "out": "/nix/store/d8nws85q8hri9qygxcgkz3g6m876cdvb-cargo-1.88.0"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -115,28 +112,27 @@
     {
       "attr_path": "cargo",
       "broken": false,
-      "derivation": "/nix/store/6iy45z5mj396iycsaiz8yjbxmf2biw8x-cargo-1.87.0.drv",
+      "derivation": "/nix/store/ivgcvyhj3r0xlf83aqzihca2fzwpdwdm-cargo-1.88.0.drv",
       "description": "Downloads your Rust project's dependencies and builds your project",
       "install_id": "cargo",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "cargo-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "cargo-1.88.0",
       "pname": "cargo",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T06:15:24.611289Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T01:28:52.469030Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/a9fmda08s2q579c59bb62n7c0ibfrqyp-cargo-1.87.0"
+        "out": "/nix/store/bcv2nzjldz3swhjdn07zmd897kl6y1xf-cargo-1.88.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -145,31 +141,30 @@
     {
       "attr_path": "rustc",
       "broken": false,
-      "derivation": "/nix/store/i4yj8spvqpl2ipxc78ki5m948h962v6k-rustc-wrapper-1.87.0.drv",
+      "derivation": "/nix/store/lab83py43hq6dg9nr11hcz9z331wkp0j-rustc-wrapper-1.88.0.drv",
       "description": "Safe, concurrent, practical language (wrapper script)",
       "install_id": "rustc",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "rustc-wrapper-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "rustc-wrapper-1.88.0",
       "pname": "rustc",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:15:03.745174Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T00:28:55.156865Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "man",
         "out"
       ],
       "outputs": {
-        "doc": "/nix/store/faabdbvkv2bga0ax1s2nv5iy66bvdr02-rustc-wrapper-1.87.0-doc",
-        "man": "/nix/store/y4lq1nv73pp2bxhgmrbkkwnz9cmp8fgw-rustc-wrapper-1.87.0-man",
-        "out": "/nix/store/r6r97lmgrw4bi5gca31ya92kzbfbaka0-rustc-wrapper-1.87.0"
+        "doc": "/nix/store/ij0msz7dqdw652hdhcbvv318723jfn6k-rustc-wrapper-1.88.0-doc",
+        "man": "/nix/store/39f5ff78h6az71w1iklx4g5w43cbxz5g-rustc-wrapper-1.88.0-man",
+        "out": "/nix/store/b5gyjynayc5aybb1dl4d47xir97i2cnk-rustc-wrapper-1.88.0"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -178,31 +173,30 @@
     {
       "attr_path": "rustc",
       "broken": false,
-      "derivation": "/nix/store/ygx1h9p3dlg0ri6fxmbyh970j3wkg2fj-rustc-wrapper-1.87.0.drv",
+      "derivation": "/nix/store/i4h0spmw6v4l72wr7gzzvf2m6xyrh16h-rustc-wrapper-1.88.0.drv",
       "description": "Safe, concurrent, practical language (wrapper script)",
       "install_id": "rustc",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "rustc-wrapper-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "rustc-wrapper-1.88.0",
       "pname": "rustc",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:35:46.421298Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T00:49:08.647606Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "man",
         "out"
       ],
       "outputs": {
-        "doc": "/nix/store/h8bpf21asrfkqdxava1vmfkr1mnvcdd8-rustc-wrapper-1.87.0-doc",
-        "man": "/nix/store/97vbnw8ck0rpi6y80npvxp70wymal6dl-rustc-wrapper-1.87.0-man",
-        "out": "/nix/store/fjdgnxlyz46kp50pjdc0gr2n5400mvzz-rustc-wrapper-1.87.0"
+        "doc": "/nix/store/2m1isqw4fdgpcq42akkm1r4y1h834k95-rustc-wrapper-1.88.0-doc",
+        "man": "/nix/store/pnp14wn1zbrkq8aawx8qsqrlqry8hsxa-rustc-wrapper-1.88.0-man",
+        "out": "/nix/store/b9f32gh63h4jd8w26rfb9d9qj9wgaya5-rustc-wrapper-1.88.0"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -211,31 +205,30 @@
     {
       "attr_path": "rustc",
       "broken": false,
-      "derivation": "/nix/store/766zw5lqmvi5kmql1i9a0iyc3hlyvvdy-rustc-wrapper-1.87.0.drv",
+      "derivation": "/nix/store/k97fiayqkl80qfwak0fdqmw3axha74vs-rustc-wrapper-1.88.0.drv",
       "description": "Safe, concurrent, practical language (wrapper script)",
       "install_id": "rustc",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "rustc-wrapper-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "rustc-wrapper-1.88.0",
       "pname": "rustc",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T05:54:22.336864Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T01:07:28.643056Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "man",
         "out"
       ],
       "outputs": {
-        "doc": "/nix/store/4gsz0hvhdlwzgj5rzzp7z6hrwq6jszjj-rustc-wrapper-1.87.0-doc",
-        "man": "/nix/store/2sygf1sap1n0bhal5isiaaqdx6ss82pi-rustc-wrapper-1.87.0-man",
-        "out": "/nix/store/nvf24al2zqylpz7g73hapcxlsl9vg8sf-rustc-wrapper-1.87.0"
+        "doc": "/nix/store/ivnnbbksixaq7dskypqzkgq90jkr4i1f-rustc-wrapper-1.88.0-doc",
+        "man": "/nix/store/yd9zkk3nandp3hz9vynm5jsxvgl9wdpf-rustc-wrapper-1.88.0-man",
+        "out": "/nix/store/kdh89qs52xdspa4k3pljj1s0pq5a8s51-rustc-wrapper-1.88.0"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -244,31 +237,30 @@
     {
       "attr_path": "rustc",
       "broken": false,
-      "derivation": "/nix/store/34sx9scfk4d74ybq0rsfq1n3b23mnm49-rustc-wrapper-1.87.0.drv",
+      "derivation": "/nix/store/200f3ybyq6ldkmgbzixi3aqjwd0kja5q-rustc-wrapper-1.88.0.drv",
       "description": "Safe, concurrent, practical language (wrapper script)",
       "install_id": "rustc",
       "license": "[ MIT, Apache-2.0 ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "name": "rustc-wrapper-1.87.0",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "name": "rustc-wrapper-1.88.0",
       "pname": "rustc",
-      "rev": "9807714d6944a957c2e036f84b0ff8caf9930bc0",
-      "rev_count": 826938,
-      "rev_date": "2025-07-08T14:16:20Z",
-      "scrape_date": "2025-07-10T06:16:27.322661Z",
+      "rev": "7fd36ee82c0275fb545775cc5e4d30542899511d",
+      "rev_count": 834672,
+      "rev_date": "2025-07-25T07:48:04Z",
+      "scrape_date": "2025-07-27T01:29:57.187782Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
-      "version": "1.87.0",
+      "version": "1.88.0",
       "outputs_to_install": [
         "man",
         "out"
       ],
       "outputs": {
-        "doc": "/nix/store/s2ygjzsdmp315vc99k1r2nrcd3m0f9dv-rustc-wrapper-1.87.0-doc",
-        "man": "/nix/store/bmj1mabj88hlrqzcy1m82b00r98r9xag-rustc-wrapper-1.87.0-man",
-        "out": "/nix/store/qy5qx741g17vb0y2qqwivabx58chyb1n-rustc-wrapper-1.87.0"
+        "doc": "/nix/store/2miwl4b08x1p8zpjaw688brv14vrn3nw-rustc-wrapper-1.88.0-doc",
+        "man": "/nix/store/kwzbhbs491p6jgq0g2cazmlwwdp1gs01-rustc-wrapper-1.88.0-man",
+        "out": "/nix/store/55xkmcp7rhryyllgdnd63xk3xsmlqacq-rustc-wrapper-1.88.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
