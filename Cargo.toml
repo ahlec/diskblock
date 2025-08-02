@@ -10,3 +10,6 @@ objc2-foundation = { version = "0.3.1", features = ["NSFileManager"] }
 simplelog = "0.12.2"
 time = "0.3.41"
 uuid = "1.17.0"
+
+[build-dependencies]
+chrono = "0.4.41"

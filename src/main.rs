@@ -50,6 +50,10 @@ fn main() -> Result<(), ()> {
     init_logger();
 
     log::info!("============================================================");
+    log::info!("DISKBLOCK");
+    log::info!("    Build time: {}", env!("BUILD_TIME"));
+    log::info!("    Git hash: {}", env!("BUILD_GIT_HASH"));
+    log::info!("============================================================");
 
     let session = match Session::new() {
         Some(session) => session,
